@@ -84,7 +84,7 @@ public class OGGConverter {
         }
     }
     
-    public static func convert(data: Data) throws -> (AVAudioPCMBuffer, Data) {
+    public static func convert(data: Data) throws -> AVAudioPCMBuffer {
         let decoder = try OGGDecoder(audioData: data)
         let layoutTag = decoder.numChannels == 1
             ? kAudioChannelLayoutTag_Mono
@@ -109,7 +109,7 @@ public class OGGConverter {
             throw OGGConverterError.failedToCreatePCMBuffer
         }
         
-        return (buffer, decoder.pcmData)
+        return buffer
     }
 }
 
