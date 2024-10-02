@@ -83,6 +83,34 @@ public class OGGConverter {
             throw OGGConverterError.other(error)
         }
     }
+    
+    static func convert(data: Data) throws -> (AVAudioPCMBuffer, Data) {
+        let decoder = try OGGDecoder(audioData: data)
+        let layoutTag = decoder.numChannels == 1
+            ? kAudioChannelLayoutTag_Mono
+            : kAudioChannelLayoutTag_Stereo
+
+        guard
+            let layout = AVAudioChannelLayout(layoutTag: layoutTag)
+        else {
+            throw OGGConverterError.failedToCreateAVAudioChannelLayout
+        }
+
+        let format = AVAudioFormat(
+            commonFormat: .pcmFormatFloat32,
+            sampleRate: Double(decoder.sampleRate),
+            interleaved: true,
+            channelLayout: layout
+        )
+
+        guard
+            let buffer = decoder.pcmData.toPCMBuffer(format: format)
+        else {
+            throw OGGConverterError.failedToCreatePCMBuffer
+        }
+        
+        return (buffer, decoder.pcmData)
+    }
 }
 
 extension Data {
