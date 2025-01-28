@@ -1,0 +1,7 @@
+[submodule "Sources/Copus"]
+	path = Sources/Copus
+	url = https://github.com/xiph/opus.git
+	branch = 101a71e03bbf860aaafb7090a0e440675cb27660
+[submodule "Sources/Cogg"]
+	path = Sources/Cogg
+	url = https://github.com/xiph/ogg.git
