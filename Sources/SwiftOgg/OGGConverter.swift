@@ -50,14 +50,7 @@ public class OGGConverter {
                 frameCapacity: AVAudioFrameCount(srcFile.length)
             ) else { throw OGGConverterError.failedToCreatePCMBuffer }
             try srcFile.read(into: buffer)
-            let streamDescription = srcFile.processingFormat.streamDescription.pointee
-            let encoder = try OGGEncoder(format: streamDescription, opusRate: Int32(srcFile.processingFormat.sampleRate), application: .audio)
-            
-            let channels = UnsafeBufferPointer(start: buffer.int16ChannelData, count: 1)
-            let length = Int(buffer.frameCapacity * buffer.format.streamDescription.pointee.mBytesPerFrame)
-            let data = Data(bytes: channels[0], count: length)
-            try encoder.encode(pcm: data)
-            let opus = encoder.bitstream(flush: true)
+            let opus = try convert(outputFormat: format, inputBuffer: buffer)
             try opus.write(to: dest)
         } catch let error as OGGConverterError  {
             throw error
@@ -94,6 +87,15 @@ public class OGGConverter {
         
         return buffer
     }
+    
+    public static func convert(outputFormat: AVAudioFormat, inputBuffer: AVAudioPCMBuffer) throws -> Data {
+        let streamDescription = inputBuffer.format.streamDescription.pointee
+        let encoder = try OGGEncoder(format: streamDescription, opusRate: Int32(outputFormat.sampleRate), application: .voip)
+        let data = inputBuffer.int16ChannelData()
+        try encoder.encode(pcm: data)
+        let opus = encoder.bitstream(flush: true)
+        return opus
+    }
 }
 
 extension Data {
@@ -113,3 +115,16 @@ extension Data {
     return buffer
   }
 }
+
+extension AVAudioPCMBuffer {
+    func int16ChannelData() -> Data {
+        let channelCount = 1
+        let channels = UnsafeBufferPointer(start: int16ChannelData, count: channelCount)
+        let ch0Data = NSData(
+            bytes: channels[0],
+            length: Int(frameCapacity * format.streamDescription.pointee.mBytesPerFrame)
+        )
+        return ch0Data as Data
+    }
+}
+

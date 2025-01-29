@@ -36,7 +36,7 @@ public class OGGEncoder {
     public init(pcmRate: Int32, pcmChannels: Int32, pcmBytesPerFrame: UInt32, opusRate: Int32, application: Application) throws {
         // avoid resampling
         guard pcmRate == opusRate else {
-            print("Resampling is not supported. Please ensure that the PCM and Opus sample rates match.")
+            print("Resampling is not supported pcmRate: \(pcmRate), opusRate: \(opusRate). Please ensure that the PCM and Opus sample rates match.")
             throw OggError.internalError
         }
 
